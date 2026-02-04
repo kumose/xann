@@ -1,5 +1,6 @@
 {
   "dependencies": [
-    "xsimd"
+    "xsimd",
+    "turbo"
   ]
 }

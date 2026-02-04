@@ -19,16 +19,30 @@
 ###kmcmake_example
 kmcmake_cc_library(
         NAMESPACE ${PROJECT_NAME}
-        NAME foo
+        NAME xann
         SOURCES
-        foo.cc
+        core/vector_space.cc
+        core/operator_registry.cc
+        distance/hamming_operator.cc
+        distance/l1_operator.cc
+        distance/l2_operator.cc
+        distance/ip_operator.cc
+        distance/jaccard_operator.cc
+        distance/cosine_operator.cc
+        distance/angle_operator.cc
+        distance/normalized_l2_operator.cc
+        distance/normalized_cosine_operator.cc
+        distance/normalized_angle_operator.cc
+        store/store.cc
+        store/id_manager.cc
+        store/vector_batch.cc
         CXXOPTS
         ${KMCMAKE_CXX_OPTIONS}
         PLINKS
         ${KMCMAKE_DEPS_LINK}
         PUBLIC
 )
-
+#[[
 kmcmake_cc_interface(
         NAMESPACE ${PROJECT_NAME}
         NAME api
@@ -54,5 +68,5 @@ kmcmake_cc_binary(
         PUBLIC
 )
 
-
+]]
 ###kmcmake_example
