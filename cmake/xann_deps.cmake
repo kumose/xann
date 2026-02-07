@@ -37,6 +37,7 @@ if (KMCMAKE_BUILD_BENCHMARK)
 endif ()
 
 find_package(Threads REQUIRED)
+find_package(turbo REQUIRED)
 
 ############################################################
 #
@@ -46,6 +47,7 @@ find_package(Threads REQUIRED)
 ##########################################################
 set(KMCMAKE_DEPS_LINK
         #${TURBO_LIB}
+        turbo::turbo_static
         ${KMCMAKE_SYSTEM_DYLINK}
         )
 list(REMOVE_DUPLICATES KMCMAKE_DEPS_LINK)
