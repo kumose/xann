@@ -32,6 +32,9 @@ namespace xann {
 
         VectorBatch &operator=(const VectorBatch &other) = delete;
 
+        VectorBatch(VectorBatch &&other)  = default;
+        VectorBatch &operator=(VectorBatch &&other) = default;
+
         [[nodiscard]] size_t capacity() const {
             return _capacity;
         }
@@ -44,6 +47,13 @@ namespace xann {
 
         void set(size_t index, turbo::span<uint8_t> value);
 
+        turbo::span<uint8_t> data() const {
+            return turbo::span<uint8_t>(_data, _capacity * _vector_byte_size);
+        }
+
+        turbo::span<uint8_t> data() {
+            return turbo::span<uint8_t>(_data, _capacity * _vector_byte_size);
+        }
     private:
         uint64_t _vector_byte_size{0};
         uint64_t _capacity{0};

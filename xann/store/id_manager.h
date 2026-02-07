@@ -111,7 +111,7 @@ namespace xann {
         /// @param  next_id  Upper bound of the active ID range ([reserved_id, next_id) is active/workable).
         /// @note   This method can only be called once (marked as initialized after execution).
         /// @note   Automatically expands _ids to fit next_id + kDefaultGrowth if current map size is insufficient.
-        void initialize(std::vector<LabelEntity> &&map, uint64_t reserved_id, uint64_t next_id);
+        turbo::Status initialize(std::vector<LabelEntity> &&map, uint64_t reserved_id, uint64_t next_id);
 
         /// @brief  Resize the internal ID pool (_ids) to the specified size (only supports expansion).
         /// @param  n  Target size of the ID pool.
@@ -188,15 +188,17 @@ namespace xann {
             _id_map[lid] = label;
         }
 
+        turbo::Result<uint64_t> local_id(uint64_t label) const;
+
         /// @brief  Query the business status of the given external label.
         /// @param  label  External unique label to query status for.
         /// @return  turbo::Result<uint64_t>  Success: the business status of the label; Failure: error status (e.g., label not found).
-        turbo::Result<uint64_t> label_status(uint64_t label) const;
+        turbo::Result<LabelEntity> label_entity(uint64_t label) const;
 
         /// @brief  Query the business status of the given local ID (lid).
         /// @param  lid  Local ID to query status for.
         /// @return  turbo::Result<uint64_t>  Success: the business status of the local ID; Failure: error status (e.g., lid out of range).
-        turbo::Result<uint64_t> local_id_status(uint64_t lid) const;
+        turbo::Result<LabelEntity> local_entity(uint64_t lid) const;
 
         /// @brief  Modify the business status of the given external label.
         /// @param  label  External unique label to modify status for.

@@ -20,16 +20,15 @@
 #include <turbo/log/logging.h>
 
 namespace xann {
-
-    void IdManager::initialize(std::vector<LabelEntity> &&map, uint64_t reserved_id,uint64_t next_id) {
+    turbo::Status IdManager::initialize(std::vector<LabelEntity> &&map, uint64_t reserved_id, uint64_t next_id) {
         if (_initialized) {
-            return;
+            return turbo::OkStatus();
         }
         _ids = std::move(map);
         _next_id = next_id;
         _reserved_id = reserved_id;
         if (_ids.size() < _next_id) {
-            resize(_next_id + kDefaultGrowth);
+            return turbo::invalid_argument_error("bad next_id for ids,ids size: ", _ids.size(), " next id:", _next_id);
         }
         for (auto i = _reserved_id; i < _next_id; i++) {
             if (_ids[i].label == kInvalidId) {
@@ -39,6 +38,7 @@ namespace xann {
             }
         }
         _initialized = true;
+        return turbo::OkStatus();
     }
 
     void IdManager::resize(size_t n) {
@@ -55,7 +55,7 @@ namespace xann {
     }
 
     turbo::Result<uint64_t> IdManager::alloc_id(uint64_t label) {
-        KCHECK(_initialized)<<"must call initialize() first";
+        KCHECK(_initialized) << "must call initialize() first";
         if (_id_map.find(label) != _id_map.end()) {
             return turbo::already_exists_error("id already exists: ", label);
         }
@@ -76,7 +76,7 @@ namespace xann {
     }
 
     void IdManager::free_id(uint64_t label) {
-        KCHECK(_initialized)<<"must call initialize() first";
+        KCHECK(_initialized) << "must call initialize() first";
         auto it = _id_map.find(label);
         if (it == _id_map.end()) {
             return;
@@ -93,7 +93,7 @@ namespace xann {
     }
 
     void IdManager::free_local_id(uint64_t lid) {
-        KCHECK(_initialized)<<"must call initialize() first";
+        KCHECK(_initialized) << "must call initialize() first";
         if (lid >= _ids.size()) {
             return;
         }
@@ -115,20 +115,27 @@ namespace xann {
         }
     }
 
-    turbo::Result<uint64_t> IdManager::label_status(uint64_t label) const {
+    turbo::Result<uint64_t> IdManager::local_id(uint64_t label) const {
         auto it = _id_map.find(label);
         if (it == _id_map.end()) {
             return turbo::resource_exhausted_error("id not found: ", label);
         }
-        return local_id_status(it->second);
+        return it->second;
+    }
+    turbo::Result<LabelEntity> IdManager::label_entity(uint64_t label) const {
+        auto it = _id_map.find(label);
+        if (it == _id_map.end()) {
+            return turbo::resource_exhausted_error("id not found: ", label);
+        }
+        return local_entity(it->second);
     }
 
-    turbo::Result<uint64_t> IdManager::local_id_status(uint64_t lid) const {
-        KCHECK(_initialized)<<"must call initialize() first";
+    turbo::Result<LabelEntity> IdManager::local_entity(uint64_t lid) const {
+        KCHECK(_initialized) << "must call initialize() first";
         if (lid >= _ids.size()) {
             return turbo::resource_exhausted_error("id not found: ", lid);
         }
-        return _ids[lid].status;
+        return _ids[lid];
     }
 
     void IdManager::set_label_status(uint64_t label, uint64_t status) {
@@ -140,11 +147,10 @@ namespace xann {
     }
 
     void IdManager::set_local_id_status(uint64_t lid, uint64_t status) {
-        KCHECK(_initialized)<<"must call initialize() first";
+        KCHECK(_initialized) << "must call initialize() first";
         if (lid >= _ids.size()) {
             return;
         }
         _ids[lid].status = status;
     }
-
-}  // namespace xann
+} // namespace xann
